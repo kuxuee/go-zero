@@ -12,3 +12,14 @@ func (m *default{{.upperStartCamelObject}}Model) Delete(ctx context.Context, {{.
 		_,err:=m.conn.ExecCtx(ctx, query, {{.lowerStartCamelPrimaryKey}}){{end}}
 	return err
 }
+
+func (m *default{{.upperStartCamelObject}}Model) Trans(fn func(session sqlx.Session)error) error  {
+	err := m.Transact(func(session sqlx.Session) error {
+		err := fn(session)
+		if err != nil{
+			return err
+		}
+		return nil
+	})
+	return err
+}
