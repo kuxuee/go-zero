@@ -450,6 +450,9 @@ func (u *Unmarshaler) processNamedFieldWithValue(field reflect.StructField, valu
 
 func (u *Unmarshaler) processNamedFieldWithoutValue(field reflect.StructField, value reflect.Value,
 	opts *fieldOptionsWithContext, fullName string) error {
+	if reflect.Ptr == field.Type.Kind() {
+		return nil
+	}
 	derefedType := Deref(field.Type)
 	fieldKind := derefedType.Kind()
 	if defaultValue, ok := opts.getDefault(); ok {
