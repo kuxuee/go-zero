@@ -24,11 +24,12 @@ func TestDurationInterceptor(t *testing.T) {
 			err:  errors.New("mock"),
 		},
 	}
+	DontLogContentForMethod("/foo")
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			cc := new(grpc.ClientConn)
 			err := DurationInterceptor(context.Background(), "/foo", nil, nil, cc,
-				func(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn,
+				func(ctx context.Context, method string, req, reply any, cc *grpc.ClientConn,
 					opts ...grpc.CallOption) error {
 					return test.err
 				})
