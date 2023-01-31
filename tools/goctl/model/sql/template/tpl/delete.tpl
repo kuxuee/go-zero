@@ -13,13 +13,17 @@ func (m *default{{.upperStartCamelObject}}Model) Delete(ctx context.Context, {{.
 	return err
 }
 
-func (m *default{{.upperStartCamelObject}}Model) Trans(fn func(session sqlx.Session)error) error  {
-	err := m.Transact(func(session sqlx.Session) error {
-		err := fn(session)
-		if err != nil{
-			return err
-		}
-		return nil
-	})
+func (m *default{{.upperStartCamelObject}}Model) TransactDelete(ctx context.Context, session sqlx.Session,	{{.lowerStartCamelPrimaryKey}} {{.dataType}}) error  {
+	{{if .withCache}}{{if .containsIndexCache}}data, err:=m.FindOne(ctx, {{.lowerStartCamelPrimaryKey}})
+	if err!=nil{
+		return err
+	}
+
+{{end}}	{{.keys}}
+    _, err {{if .containsIndexCache}}={{else}}:={{end}} m.ExecCtx(ctx, func(ctx context.Context, conn sqlx.SqlConn) (result sql.Result, err error) {
+		query := fmt.Sprintf("delete from %s where {{.originalPrimaryKey}} = {{if .postgreSql}}$1{{else}}?{{end}}", m.table)
+		return session.ExecCtx(ctx, query, {{.lowerStartCamelPrimaryKey}})
+	}, {{.keyValues}}){{else}}query := fmt.Sprintf("delete from %s where {{.originalPrimaryKey}} = {{if .postgreSql}}$1{{else}}?{{end}}", m.table)
+		_,err:=session.ExecCtx(ctx, query, {{.lowerStartCamelPrimaryKey}}){{end}}
 	return err
 }
